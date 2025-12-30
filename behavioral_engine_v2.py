@@ -1,3 +1,9 @@
+
+import time
+import random
+import os
+from datetime import datetime
+
 """
 Project: SpectrumShieldOS
 Author: Precious Onyekachi
@@ -6,11 +12,6 @@ A behavioral-based security engine that detects anomalous typing
 patterns using speed and rhythm analysis to trigger adaptive
 protection mechanisms.
 """
-
-import time
-import os
-from datetime import datetime
-
 # ================== CONFIGURATION ==================
 BASELINE_FILE = "baseline_v2.txt"
 LOG_FILE = "behavior_log_v2.txt"
@@ -97,6 +98,11 @@ def measure_typing_behavior():
 
     return speed, avg_interval
 
+def human_typing():
+    return random.uniform(0.08, 0.35)
+
+def bot_typing():
+    return 0.01
 # ================== SECURITY MODES ==================
 
 def activate_ghost_mode():
@@ -147,6 +153,21 @@ def log_session(speed, risk):
 def explain_risk(speed, baseline):
     deviation = abs(speed - baseline) / baseline * 100
     print(f"Deviation from baseline: {deviation:.1f}%")
+
+def calculate_risk(speed_dev, error_rate, timing_var, burst):
+    risk = (
+        speed_dev * 0.35 +
+        error_rate * 0.25 +
+        timing_var * 0.25 +
+        burst * 0.15
+    )
+    return round(min(risk, 100), 2)
+
+def dwell_time(press, release):
+    return release - press
+
+def flight_time(prev_release, next_press):
+    return next_press - prev_release
 
 # ================== MAIN ENGINE ==================
 

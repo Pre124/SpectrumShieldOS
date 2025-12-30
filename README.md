@@ -58,3 +58,24 @@ Designed to detect:
 - Zero-trust principles
 ```bash
 pip install keyboard
+
+Risk Score Interpretation
+Score	Meaning
+0–25	Legitimate user
+26–50	Suspicious
+51–75	High risk
+76–100	Likely bot or compromised
+
+Bot vs Human Simulation
+
+Bots → perfect timing, no pauses
+
+Humans → irregular timing, hesitation, errors
+
+Tech Stack
+
+Python
+
+Behavioral Analytics
+
+Cybersecurity Risk Modeling
