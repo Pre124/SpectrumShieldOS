@@ -1,0 +1,2 @@
+[2025-12-27 21:33:10] Baseline learned: 1.30 cps
+[2025-12-27 21:50:11] Session speed: 7.45 cps | Risk: MEDIUM

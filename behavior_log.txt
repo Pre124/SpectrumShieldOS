@@ -1,0 +1,23 @@
+Risk: LOW, Speed: 10.44 cps
+Risk: LOW, Speed: 8.75 cps
+Risk: HIGH, Speed: 4.05 cps
+Risk: HIGH, Speed: 4.05 cps
+Risk: HIGH, Speed: 4.05 cps
+Risk: HIGH, Speed: 4.05 cps
+2025-12-14 15:00:45 | Risk: HIGH | Speed: 3.97 cps | GhostMode: ON
+2025-12-14 15:49:58 | Risk: HIGH | Speed: 3.87 cps | GhostMode: ON
+2025-12-14 16:08:41 | Risk: MEDIUM | Speed: 3143.19 cps | GhostMode: OFF
+2025-12-14 16:08:41 | Risk: MEDIUM | Speed: 4202.51 cps | GhostMode: OFF
+2025-12-14 16:08:42 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:08:42 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:08:42 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:08:42 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:08:42 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:08:43 | Risk: MEDIUM | Speed: 7333.28 cps | GhostMode: OFF
+2025-12-14 16:08:43 | Risk: MEDIUM | Speed: 21029.10 cps | GhostMode: OFF
+2025-12-14 16:08:43 | Risk: HIGH | Speed: 0.00 cps | GhostMode: ON
+2025-12-14 16:09:10 | Risk: MEDIUM | Speed: 2584.91 cps | GhostMode: OFF
+2025-12-21 00:39:00.522692 | 1.13 cps | HIGH
+2025-12-21 00:55:28.988516 | speed=0.00 cps | risk=HIGH
+2025-12-25 14:38:42.538552 | speed=3.87 cps | risk=HIGH
+2025-12-27 22:10:27 | Speed: 2.30 cps | Risk: MEDIUM
