@@ -1,3 +1,12 @@
+"""
+Project: SpectrumShieldOS
+Author: Precious Onyekachi
+Description:
+A behavioral-based security engine that detects anomalous typing
+patterns using speed and rhythm analysis to trigger adaptive
+protection mechanisms.
+"""
+
 import time
 import os
 from datetime import datetime
@@ -57,12 +66,13 @@ def measure_typing_speed():
 
     return len(text) / max(end - start, 0.01)
 
-def assess_risk(speed, baseline):
-    variance = calculate_variance(speed, baseline)
-
-    if variance > 1.5:
+def assess_risk(speed, baseline_speed, avg_interval):
+    if speed <= 0:
         return "HIGH"
-    elif variance > 0.6:
+
+    if speed < baseline_speed * 0.6 or avg_interval > 0.6:
+        return "HIGH"
+    elif speed > baseline_speed * 1.5 or avg_interval < 0.05:
         return "MEDIUM"
     else:
         return "LOW"
@@ -70,17 +80,34 @@ def assess_risk(speed, baseline):
 def calculate_variance(speed, baseline):
     return abs(speed - baseline) / baseline
 
+def measure_typing_behavior():
+    input("Press Enter when ready to start typing...")
+    start = time.time()
+
+    text = input("Type something and press Enter: ")
+
+    end = time.time()
+
+    duration = end - start
+    if duration <= 0 or len(text) == 0:
+        return 0, 0
+
+    speed = len(text) / duration
+    avg_interval = duration / len(text)
+
+    return speed, avg_interval
+
 # ================== SECURITY MODES ==================
 
 def activate_ghost_mode():
     if not SILENT_MODE:
-        print("👻 Ghost Mode Activated")
-        print("Behavioral signals masked")
+        print("Ghost Mode Activated: behavioral anomaly detected")
+        print("user behavioral signals temporarily restricted")
     log_event("Ghost Mode activated")
 
 def adaptive_strict_mode():
     if not SILENT_MODE:
-        print("⚠ Adaptive Strict Mode ENABLED")
+        print("Adaptive Strict Mode ENABLED")
         print("Sensitive actions restricted")
     log_event("Adaptive Strict Mode enabled")
 
@@ -104,7 +131,7 @@ def adaptive_strict_mode(risk):
 
     # Trigger strict mode
     if count >= 2:
-        print("⚠ Adaptive Strict Mode ENABLED")
+        print("Adaptive Strict Mode ENABLED")
         print("Sensitive actions restricted")
 
 
@@ -116,6 +143,10 @@ def log_session(speed, risk):
 def log_session(speed, risk):
     with open("session_log.txt", "a") as f:
         f.write(f"Speed: {speed:.2f} cps | Risk: {risk}\n")
+
+def explain_risk(speed, baseline):
+    deviation = abs(speed - baseline) / baseline * 100
+    print(f"Deviation from baseline: {deviation:.1f}%")
 
 # ================== MAIN ENGINE ==================
 
@@ -133,7 +164,10 @@ def main():
         print(f"Current speed: {speed:.2f} cps")
 
         risk = assess_risk(speed, baseline_speed)
-        
+        explain_risk(speed, baseline_speed)
+        if speed <= 0:
+         print("Invalid typing data detected")
+         continue
 
         if risk == "HIGH":
             high_risk_counter += 1
@@ -143,11 +177,11 @@ def main():
                # adaptive_strict_mode()
 
         elif risk == "MEDIUM" and not SILENT_MODE:
-            print("⚠ Medium risk behavior detected")
+            print("Medium risk behavior detected")
 
         elif risk == "LOW":
           if not SILENT_MODE:
-             print("✅ Normal behavior")
+             print("Normal behavior")
 
         baseline_speed = (
         (1 - BASELINE_ADAPT_RATE) * baseline_speed
@@ -162,6 +196,11 @@ def main():
         print(f"Risk Level: {risk}")
         log_session(speed, risk)
         #log_event(f"Session speed: {speed:.2f} cps | Risk: {risk}")
+
+        speed, avg_interval = measure_typing_behavior()
+        print(f"Speed: {speed:.2f} cps | Avg interval: {avg_interval:.2f}s")
+
+        risk = assess_risk(speed, baseline_speed, avg_interval)
 
 # ================== RUN ==================
 
