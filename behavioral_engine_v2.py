@@ -1,4 +1,4 @@
-
+import keyboard
 import time
 import random
 import os
@@ -163,12 +163,52 @@ def calculate_risk(speed_dev, error_rate, timing_var, burst):
     )
     return round(min(risk, 100), 2)
 
+def calculate_risk_score(current_speed, normal_speed):
+    """
+    Returns a risk score from 0 to 100
+    - 0 = perfectly normal typing
+    - 100 = extreme deviation (either very slow or very fast)
+    """
+    deviation = abs(current_speed - normal_speed) / normal_speed
+    score = min(int(deviation * 100), 100)
+    return score
+
 def dwell_time(press, release):
     return release - press
 
 def flight_time(prev_release, next_press):
     return next_press - prev_release
 
+def simulate_bot_typing(text_length=50, cps=100):
+    """Generate simulated typing speed (high cps for bot)"""
+    return cps  # artificially high speed to simulate a bot
+
+def record_keystrokes(duration=5):
+    """Records key press and release events for a duration"""
+    events = []
+    start = time.time()
+    while time.time() - start < duration:
+        event = keyboard.read_event()
+        if event.event_type in ['down', 'up']:
+            events.append((event.name, event.event_type, event.time))
+    return events
+
+def analyze_keystrokes(events):
+    dwell_times = []
+    flight_times = []
+    last_up_time = None
+    for name, event_type, t in events:
+        if event_type == 'down':
+            key_down_time = t
+        elif event_type == 'up':
+            key_up_time = t
+            dwell_times.append(key_up_time - key_down_time)
+            if last_up_time:
+                flight_times.append(key_down_time - last_up_time)
+            last_up_time = key_up_time
+    avg_dwell = sum(dwell_times) / len(dwell_times) if dwell_times else 0
+    avg_flight = sum(flight_times) / len(flight_times) if flight_times else 0
+    return avg_dwell, avg_flight
 # ================== MAIN ENGINE ==================
 
 def main():
@@ -216,12 +256,31 @@ def main():
                 
         print(f"Risk Level: {risk}")
         log_session(speed, risk)
-        #log_event(f"Session speed: {speed:.2f} cps | Risk: {risk}")
 
         speed, avg_interval = measure_typing_behavior()
         print(f"Speed: {speed:.2f} cps | Avg interval: {avg_interval:.2f}s")
 
         risk = assess_risk(speed, baseline_speed, avg_interval)
+
+        risk_score = calculate_risk_score(speed, baseline_speed)
+        print(f"Risk Score: {risk_score}/100")
+
+        if risk_score >= 70:
+         print("HIGH RISK")
+
+        elif risk_score >= 40:
+          print("MEDIUM RISK")
+
+        else:
+          print("LOW RISK")
+
+      # Ask if user wants to simulate bot typing
+while True:
+    choice = input("Simulate bot typing? (y/n): ").strip().lower()
+    if choice in ['y', 'n']:
+        test_mode = choice == 'y'  # True if 'y', False if 'n'
+        break
+    print("Please enter 'y' or 'n'.")
 
 # ================== RUN ==================
 
