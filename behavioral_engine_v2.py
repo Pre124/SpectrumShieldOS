@@ -1,288 +1,250 @@
-import keyboard
+
 import time
 import random
-import os
-from datetime import datetime
+import sys
+import statistics
 
 """
-Project: SpectrumShieldOS
-Author: Precious Onyekachi
-Description:
-A behavioral-based security engine that detects anomalous typing
-patterns using speed and rhythm analysis to trigger adaptive
-protection mechanisms.
+#Project: SpectrumShieldOS
+#Author: Precious Onyekachi
+#Description:
+#Behavioral-based security engine detecting anomalous typing patterns.
+#Includes BOT simulation, keystroke dynamics, risk scoring, and adaptive protections.
 """
-# ================== CONFIGURATION ==================
-BASELINE_FILE = "baseline_v2.txt"
-LOG_FILE = "behavior_log_v2.txt"
-high_risk_file = "high_risk_count.txt"
-RISK_DECAY_RATE = 1   # How much trust recovers per LOW session
-SILENT_MODE = True        # True = no terminal output
-STRICT_THRESHOLD = 2      # HIGH risk count before strict mode
-high_risk_counter = 0
-BASELINE_ADAPT_RATE = 0.05  # 5% slow learning
+LOG_FILE = "session_log.txt"
 
-# ================== UTILITY ==================
+session_speeds = []
+session_risks = []
+MAX_HISTORY = 10
 
-def log_event(message):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a") as log:
-        log.write(f"[{timestamp}] {message}\n")
+# =========================
+# Keystroke Dynamics
+# =========================
 
-# ================== BASELINE ==================
+def capture_real_keystrokes():
+    print("\n--- Typing Speed Test ---")
+    print("Press ENTER, then type a sentence and press ENTER again...\n")
 
-def learn_baseline():
-    print("Learning your normal typing behavior...")
-    input("Press Enter when ready to start typing...")
-    text = input("Type something and press Enter: ")
+    input()  # Wait for user to press Enter
 
-    start = time.time()
-    input("Press Enter when done typing...")
-    end = time.time()
+    text = input("Start typing: ")
 
-    speed = len(text) / max(end - start, 0.01)
+    if len(text.strip()) == 0:
+        return None, None, None
 
-    with open(BASELINE_FILE, "w") as f:
-        f.write(str(speed))
+    start_time = time.time()
+    end_time = time.time()
 
-    log_event(f"Baseline learned: {speed:.2f} cps")
-    return speed
-
-def load_or_create_baseline():
-    if not os.path.exists(BASELINE_FILE):
-        return learn_baseline()
-
-    with open(BASELINE_FILE, "r") as f:
-        return float(f.read())
-
-# ================== BEHAVIOR ==================
-
-def measure_typing_speed():
-    input("\nPress Enter when ready to start typing...")
-    text = input("Type something and press Enter: ")
-
-    start = time.time()
-    input("Press Enter when done typing...")
-    end = time.time()
-
-    return len(text) / max(end - start, 0.01)
-
-def assess_risk(speed, baseline_speed, avg_interval):
-    if speed <= 0:
-        return "HIGH"
-
-    if speed < baseline_speed * 0.6 or avg_interval > 0.6:
-        return "HIGH"
-    elif speed > baseline_speed * 1.5 or avg_interval < 0.05:
-        return "MEDIUM"
-    else:
-        return "LOW"
-
-def calculate_variance(speed, baseline):
-    return abs(speed - baseline) / baseline
-
-def measure_typing_behavior():
-    input("Press Enter when ready to start typing...")
-    start = time.time()
-
-    text = input("Type something and press Enter: ")
-
-    end = time.time()
-
-    duration = end - start
-    if duration <= 0 or len(text) == 0:
-        return 0, 0
+    duration = max(end_time - start_time, 0.1)
 
     speed = len(text) / duration
-    avg_interval = duration / len(text)
+    avg_interval = duration / max(len(text), 1)
 
+    return speed, avg_interval, text
+
+def capture_typing():
+    print("\n--- Typing Speed Test ---")
+    print("Press ENTER, then type a sentence and press ENTER again...\n")
+
+    input("Press ENTER to start...")
+    start_time = time.time()
+
+    text = input("Type here: ")
+
+    end_time = time.time()
+    duration = end_time - start_time
+
+    if len(text.strip()) == 0 or duration == 0:
+        return None, None, None
+
+    speed = len(text) / duration  # characters per second
+
+    # Simulated keystroke intervals (real capture comes later)
+    intervals = [random.uniform(0.05, 0.25) for _ in text]
+
+    avg_interval = statistics.mean(intervals)
+    interval_std = statistics.stdev(intervals) if len(intervals) > 1 else 0
+
+    return speed, avg_interval, interval_std, text, 
+
+
+# =========================
+# Bot Simulation
+# =========================
+"""
+def simulate_bot_typing():
+    speed = random.uniform(7.5, 12.0)  # bots are fast
+    avg_interval = random.uniform(0.01, 0.04)
     return speed, avg_interval
-
-def human_typing():
-    return random.uniform(0.08, 0.35)
-
-def bot_typing():
-    return 0.01
-# ================== SECURITY MODES ==================
-
-def activate_ghost_mode():
-    if not SILENT_MODE:
-        print("Ghost Mode Activated: behavioral anomaly detected")
-        print("user behavioral signals temporarily restricted")
-    log_event("Ghost Mode activated")
-
-def adaptive_strict_mode():
-    if not SILENT_MODE:
-        print("Adaptive Strict Mode ENABLED")
-        print("Sensitive actions restricted")
-    log_event("Adaptive Strict Mode enabled")
-
-def adaptive_strict_mode(risk):
-    # Load previous high-risk count
-    if os.path.exists(high_risk_file):
-        with open(high_risk_file, "r") as file:
-            count = int(file.read())
-    else:
-        count = 0
-
-    # Update count
-    if risk == "HIGH":
-        count += 1
-    else:
-        count = 0
-
-    # Save updated count
-    with open(high_risk_file, "w") as file:
-        file.write(str(count))
-
-    # Trigger strict mode
-    if count >= 2:
-        print("Adaptive Strict Mode ENABLED")
-        print("Sensitive actions restricted")
+"""
+"""
+def simulate_bot_typing():
+    speed = random.uniform(3.0, 10.0)
+    avg_interval = random.uniform(0.05, 0.25)
+    return speed, avg_interval, "[BOT INPUT]"
+"""
+def simulate_bot_typing():
+    speed = random.uniform(3.0, 10.0)
+    avg_interval = random.uniform(0.01, 0.04)   # bots are very consistent
+    interval_std = random.uniform(0.001, 0.01)  # extremely low variance
+    return speed, avg_interval, interval_std, "[BOT INPUT]"
 
 
-def log_session(speed, risk):
-    with open("behavior_log.txt", "a") as file:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        file.write(f"{timestamp} | Speed: {speed:.2f} cps | Risk: {risk}\n")
 
-def log_session(speed, risk):
-    with open("session_log.txt", "a") as f:
-        f.write(f"Speed: {speed:.2f} cps | Risk: {risk}\n")
+# =========================
+# Risk Assessment
+# =========================
 
-def explain_risk(speed, baseline):
-    deviation = abs(speed - baseline) / baseline * 100
-    print(f"Deviation from baseline: {deviation:.1f}%")
+def assess_risk(speed, baseline_speed, avg_interval, interval_std):
+    risk = 0
 
-def calculate_risk(speed_dev, error_rate, timing_var, burst):
-    risk = (
-        speed_dev * 0.35 +
-        error_rate * 0.25 +
-        timing_var * 0.25 +
-        burst * 0.15
-    )
-    return round(min(risk, 100), 2)
+    if speed > baseline_speed * 2:
+        risk += 40
 
-def calculate_risk_score(current_speed, normal_speed):
-    """
-    Returns a risk score from 0 to 100
-    - 0 = perfectly normal typing
-    - 100 = extreme deviation (either very slow or very fast)
-    """
-    deviation = abs(current_speed - normal_speed) / normal_speed
-    score = min(int(deviation * 100), 100)
-    return score
+    if avg_interval < 0.05:
+        risk += 40
 
-def dwell_time(press, release):
-    return release - press
+    if speed > 10:
+        risk += 20
 
-def flight_time(prev_release, next_press):
-    return next_press - prev_release
+    if interval_std < 0.01:
+        risk += 30
 
-def simulate_bot_typing(text_length=50, cps=100):
-    """Generate simulated typing speed (high cps for bot)"""
-    return cps  # artificially high speed to simulate a bot
+    return min(risk, 100)
 
-def record_keystrokes(duration=5):
-    """Records key press and release events for a duration"""
-    events = []
-    start = time.time()
-    while time.time() - start < duration:
-        event = keyboard.read_event()
-        if event.event_type in ['down', 'up']:
-            events.append((event.name, event.event_type, event.time))
-    return events
+def show_risk_trend():
+    print("Risk trend tracking coming soon...")
+   
 
-def analyze_keystrokes(events):
-    dwell_times = []
-    flight_times = []
-    last_up_time = None
-    for name, event_type, t in events:
-        if event_type == 'down':
-            key_down_time = t
-        elif event_type == 'up':
-            key_up_time = t
-            dwell_times.append(key_up_time - key_down_time)
-            if last_up_time:
-                flight_times.append(key_down_time - last_up_time)
-            last_up_time = key_up_time
-    avg_dwell = sum(dwell_times) / len(dwell_times) if dwell_times else 0
-    avg_flight = sum(flight_times) / len(flight_times) if flight_times else 0
-    return avg_dwell, avg_flight
-# ================== MAIN ENGINE ==================
+# =========================
+# Baseline Calibration
+# =========================
+
+def calibrate_user():
+    print("\n--- Baseline Calibration ---")
+    print("Type naturally. This sets your normal behavior.\n")
+
+    speed, avg_interval, interval_std, _ = capture_typing()
+
+    if speed is None:
+        print("Calibration failed. Try again.")
+        return calibrate_user()
+
+    print(f"\nBaseline speed saved: {speed:.2f} cps")
+    return speed
+
+
+def replay_last_attack():
+    if not session_speeds or not session_risks:
+        print("No session data to replay.")
+        return
+
+    print("\n--- ATTACK REPLAY ---")
+    for i in range(len(session_speeds)):
+        print(
+            f"Session {i+1}: "
+            f"Speed={session_speeds[i]:.2f} cps | "
+            f"Risk={session_risks[i]}%"
+        )
+
+def log_session(speed, avg_interval, risk, is_bot):
+    with open(LOG_FILE, "a") as f:
+        f.write(
+            f"Speed: {speed:.2f} cps | "
+            f"Avg Interval: {avg_interval:.3f}s | "
+            f"Risk: {risk}% | "
+            f"Bot Mode: {is_bot}\n"
+        )
+
+# =========================
+# MAIN PROGRAM
+# =========================
 
 def main():
-    global high_risk_counter
-    baseline_speed = load_or_create_baseline()
-    print(f"\nBaseline typing speed: {baseline_speed:.2f} cps")
+    print("SpectrumShield Behavioral Engine\n")
 
-    high_risk_counter = 0
+    bot_choice = input("Simulate bot typing? (y/n): ").lower().strip()
+    simulate_bot = bot_choice == "y"
+
+    baseline_speed = calibrate_user()
 
     while True:
         print("\n--- New Session ---")
 
-        speed = measure_typing_speed()
-        print(f"Current speed: {speed:.2f} cps")
-
-        risk = assess_risk(speed, baseline_speed)
-        explain_risk(speed, baseline_speed)
-        if speed <= 0:
-         print("Invalid typing data detected")
-         continue
-
-        if risk == "HIGH":
-            high_risk_counter += 1
-            activate_ghost_mode()
-
-           # if high_risk_counter >= STRICT_THRESHOLD:
-               # adaptive_strict_mode()
-
-        elif risk == "MEDIUM" and not SILENT_MODE:
-            print("Medium risk behavior detected")
-
-        elif risk == "LOW":
-          if not SILENT_MODE:
-             print("Normal behavior")
-
-        baseline_speed = (
-        (1 - BASELINE_ADAPT_RATE) * baseline_speed
-        + BASELINE_ADAPT_RATE * speed
-        )
-
-        high_risk_counter = 0
-    
-        if high_risk_counter >= STRICT_THRESHOLD:
-                adaptive_strict_mode()
-                
-        print(f"Risk Level: {risk}")
-        log_session(speed, risk)
-
-        speed, avg_interval = measure_typing_behavior()
-        print(f"Speed: {speed:.2f} cps | Avg interval: {avg_interval:.2f}s")
-
-        risk = assess_risk(speed, baseline_speed, avg_interval)
-
-        risk_score = calculate_risk_score(speed, baseline_speed)
-        print(f"Risk Score: {risk_score}/100")
-
-        if risk_score >= 70:
-         print("HIGH RISK")
-
-        elif risk_score >= 40:
-          print("MEDIUM RISK")
+        if simulate_bot:
+            speed, avg_interval, interval_std, text = simulate_bot_typing()
+            print(f"(BOT simulation) Speed: {speed:.2f} cps")
 
         else:
-          print("LOW RISK")
+            speed, avg_interval, interval_std, text = capture_typing()
 
-      # Ask if user wants to simulate bot typing
-while True:
-    choice = input("Simulate bot typing? (y/n): ").strip().lower()
-    if choice in ['y', 'n']:
-        test_mode = choice == 'y'  # True if 'y', False if 'n'
-        break
-    print("Please enter 'y' or 'n'.")
+            if speed is None:
+                print("No typing detected. Try again.")
+                continue
 
-# ================== RUN ==================
+            print(f"Typing speed: {speed:.2f} cps")
+            print(f"Average keystroke interval: {avg_interval:.3f}s")
+
+        risk = assess_risk(speed, baseline_speed, avg_interval, interval_std)
+
+        # Store session history
+        session_speeds.append(speed)
+        session_risks.append(risk)
+
+        if len(session_speeds) > MAX_HISTORY:
+           session_speeds.pop(0)
+           session_risks.pop(0)
+
+        if len(session_risks) >= 3:
+           avg_risk = sum(session_risks) / len(session_risks)
+           print(f"Average Risk (last {len(session_risks)} sessions): {avg_risk:.1f}%")
+
+        print(f"\n Risk Score: {risk}%")
+
+        human_confidence = max(0, 100 - risk)
+        print(f"Human Confidence: {human_confidence}%")
+
+        if human_confidence >= 80:
+            print("Strong Human Behavior")
+        elif human_confidence >= 50:
+            print("Medium Confidence Human")
+        else:
+            print("Low Confidence (Possible Bot)")
+
+        if risk >= 70:
+            replay_last_attack()
+
+        log_session(speed, avg_interval, risk, simulate_bot)
+
+       # mimic_bot = detect_bot_mimic(intervals)
+
+        #if mimic_bot:
+           # print("Advanced bot mimic behavior detected")
+            #risk = min(risk + 20, 100)
+
+        # Adaptive baseline learning (Human + Medium risk)
+        if risk < 70:
+            learning_rate = 0.05  # slow and safe adaptation
+            baseline_speed = (baseline_speed * (1 - learning_rate)) + (speed * learning_rate)
+
+            print(f"Baseline updated → {baseline_speed:.2f} cps")
+        else:
+            print("Baseline locked (suspicious behavior)")
+        if risk >= 70:
+            print("Likely BOT behavior detected")
+        else:
+            print("Human behavior confirmed")
+
+        show_risk_trend()
+        again = input("\nTest again? (y/n): ").lower().strip()
+        if again != "y":
+            print("\nSession ended. Stay secure")
+            break
+
+
+# =========================
+# ENTRY POINT
+# =========================
 
 if __name__ == "__main__":
     main()

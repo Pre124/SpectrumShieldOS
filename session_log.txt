@@ -1,0 +1,4 @@
+Speed: 11.46 cps | Avg Interval: 0.152s | Risk: 60% | Bot Mode: False
+Speed: 14.48 cps | Avg Interval: 0.153s | Risk: 20% | Bot Mode: False
+Speed: 13.32 cps | Avg Interval: 0.157s | Risk: 60% | Bot Mode: False
+Speed: 15.94 cps | Avg Interval: 0.148s | Risk: 20% | Bot Mode: False
